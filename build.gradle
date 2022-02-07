@@ -11,13 +11,17 @@ buildscript {
         }
     }
 }
+
+plugins {
+    id("maven-publish")
+}
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 group = 'net.minecraftforge.srg2source'
-version = '3.3-SNAPSHOT'
+version = '3.3-updated'
 archivesBaseName = 'Srg2Source'
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
@@ -90,71 +94,21 @@ artifacts {
     archives sourcesJar
 }
 
-uploadArchives {
+publishing {
     repositories {
-        if (project.hasProperty("filesmaven")) {
-            logger.info('Publishing to files server')
-
-            mavenDeployer {
-                configuration = configurations.deployerJars
-
-                repository(url: project.filesmaven.url) {
-                    authentication(userName: project.filesmaven.username, privateKey: project.filesmaven.key)
-                }
-
-                pom {
-                    groupId = project.group
-                    version = project.version
-                    artifactId = project.archivesBaseName
-                    project {
-                        name project.archivesBaseName
-                        packaging 'jar'
-                        description 'Srg2Source library for ForgeGradle'
-                        url 'https://github.com/MinecraftForge/Srg2Source'
-
-                        scm {
-                            url 'https://github.com/MinecraftForge/Srg2Source'
-                            connection 'scm:git:git://github.com/MinecraftForge/Srg2Source.git'
-                            developerConnection 'scm:git:git@github.com:MinecraftForge/Srg2Source.git'
-                        }
-
-                        issueManagement {
-                            system 'github'
-                            url 'https://github.com/MinecraftForge/Srg2Source/issues'
-                        }
-
-                        licenses {
-                            license {
-                                name 'The BSD 3-Clause License'
-                                url 'http://opensource.org/licenses/BSD-3-Clause'
-                                distribution 'repo'
-                            }
-                        }
-
-                        developers {
-                            developer {
-                                id 'agaricusb'
-                                name 'Agaricusb'
-                                roles { role 'developer' }
-                            }
-                            developer {
-                                id 'LexManos'
-                                name 'Lex Manos'
-                                roles { role 'developer' }
-                            }
-                            developer {
-                                id 'AbrarSyed'
-                                name 'Abrar Syed'
-                                roles { role 'developer' }
-                            }
-                        }
-                    }
-                }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/XCodersTeam/Srg2Source")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
-        else
-        {
-            add project.repositories.mavenLocal()
+    }
+    publications {
+        gpr(MavenPublication) {
+            artifactId = 'srg2source'
+            from(components.java)
         }
     }
 }
